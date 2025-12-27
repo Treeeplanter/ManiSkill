@@ -30,32 +30,33 @@ from mani_skill.utils.logging_utils import logger
 from mani_skill.utils.wrappers.flatten import FlattenActionSpaceWrapper
 from mani_skill.utils.wrappers.record import RecordEpisode
 
+from mani_skill.envs.tasks.steer_tasks.pickplace_1_cube import PickPlace1CubeEnv
 
 @dataclass
 class Args:
-    traj_path: str
+    traj_path: str = "/home/shuo/research/ManiSkill/demos/PickPlace1Cube-v1/test/trajectory.h5"
     """Path to the trajectory .h5 file to replay"""
     sim_backend: Annotated[Optional[str], tyro.conf.arg(aliases=["-b"])] = None
     """Which simulation backend to use. Can be 'physx_cpu', 'physx_gpu'. If not specified the backend used is the same as the one used to collect the trajectory data."""
-    obs_mode: Annotated[Optional[str], tyro.conf.arg(aliases=["-o"])] = None
+    obs_mode: Annotated[Optional[str], tyro.conf.arg(aliases=["-o"])] = "rgb"
     """Target observation mode to record in the trajectory. See
     https://maniskill.readthedocs.io/en/latest/user_guide/concepts/observation.html for a full list of supported observation modes."""
-    target_control_mode: Annotated[Optional[str], tyro.conf.arg(aliases=["-c"])] = None
+    target_control_mode: Annotated[Optional[str], tyro.conf.arg(aliases=["-c"])] = "pd_ee_delta_pose"
     """Target control mode to convert the demonstration actions to.
     Note that not all control modes can be converted to others successfully and not all robots have easy to convert control modes.
     Currently the Panda robots are the best supported when it comes to control mode conversion. Furthermore control mode conversion is not supported in GPU parallelized environments.
     """
-    verbose: bool = False
+    verbose: bool = True
     """Whether to print verbose information during trajectory replays"""
-    save_traj: bool = False
+    save_traj: bool = True
     """Whether to save trajectories to disk. This will not override the original trajectory file."""
-    save_video: bool = False
+    save_video: bool = True
     """Whether to save videos"""
     max_retry: int = 0
     """Maximum number of times to try and replay a trajectory until the task reaches a success state at the end."""
     discard_timeout: bool = False
     """Whether to discard episodes that timeout and are truncated (depends on the max_episode_steps parameter of task)"""
-    allow_failure: bool = False
+    allow_failure: bool = True
     """Whether to include episodes that fail in saved videos and trajectory data based on the environment's evaluation returned "success" label"""
     vis: bool = False
     """Whether to visualize the trajectory replay via the GUI."""
@@ -68,7 +69,7 @@ class Args:
     state as GPU simulated tasks will randomize initial states differently despite given the same seed compared to CPU sim."""
     count: Optional[int] = None
     """Number of demonstrations to replay before exiting. By default will replay all demonstrations"""
-    reward_mode: Optional[str] = None
+    reward_mode: Optional[str] = "none"
     """Specifies the reward type that the env should use. By default it will pick the first supported reward mode. Most environments
     support 'sparse', 'none', and some further support 'normalized_dense' and 'dense' reward modes"""
     record_rewards: bool = False
@@ -367,8 +368,9 @@ def replay_cpu_sim(
             else:
                 if args.verbose:
                     print("info", info)
+                    import pdb; pdb.set_trace()
         else:
-            env.flush_video(save=False)
+            env.flush_video(save=True)
             tqdm.write(f"Episode {episode_id} is not replayed successfully. Skipping")
 
     return ReplayResult(

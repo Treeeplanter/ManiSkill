@@ -1,0 +1,1 @@
+from .pickplace_1_cube import PickPlace1CubeEnv

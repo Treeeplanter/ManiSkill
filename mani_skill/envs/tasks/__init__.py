@@ -9,3 +9,4 @@ from .mobile_manipulation import *
 from .quadruped import *
 from .rotate_cube import RotateCubeEnv
 from .tabletop import *
+from .steer_tasks import *
